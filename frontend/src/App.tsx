@@ -141,7 +141,7 @@ function Results({ ds, res }: { ds: Dataset; res: SearchResult }) {
   if (!res.results.length) return <p className="muted">No matches for “{res.query}”.</p>;
   return (
     <section>
-      <p className="muted"><b>{res.results.length}</b> best matches of {res.totalRows} rows · {res.method} · <span className="mono">{res.model}</span></p>
+      <p className="muted"><b>{res.results.length}</b> best matches of {res.totalRows} rows · {res.method}</p>
       <div className="table-wrap">
         <table>
           <thead><tr><th>Row</th>{cols.map((c) => <th key={c}>{c}</th>)}<th>Match</th></tr></thead>
@@ -208,7 +208,7 @@ export default function App() {
       <main>
         <div className="hero">
           <h1>Find the right rows by <em>meaning</em>, not just keywords.</h1>
-          <p>Upload a spreadsheet and ask in plain language. SoldrinAI Smart Search combines semantic embeddings with keyword ranking.</p>
+          <p>Your data already holds the answers. SoldrinAI Smart Search surfaces them in seconds, using the words you’d actually say.</p>
         </div>
         <Stepper step={step} />
         {step === 0 && <Details onDone={(n) => { setName(n); setStep(1); }} />}

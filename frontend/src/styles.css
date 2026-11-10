@@ -8,15 +8,15 @@ header{display:flex;justify-content:space-between;align-items:center;padding:18p
 .brand span{color:var(--ink)}.brand b{color:var(--cyan);font-weight:600}.brand em{font-style:normal;font-weight:400;color:var(--sub);margin-left:4px}
 .status{color:var(--sub);font-size:13px;display:flex;align-items:center;gap:8px}.status i{width:8px;height:8px;border-radius:50%;background:var(--ok)}
 main{flex:1;padding:36px 0 48px}
-.hero{max-width:680px;margin-bottom:28px}.hero h1{font-size:clamp(28px,4.2vw,40px);line-height:1.15;margin:0 0 12px;letter-spacing:-.025em;font-weight:650}
+.hero{max-width:680px;margin:0 auto 28px;text-align:center}.hero h1{font-size:clamp(28px,4.2vw,40px);line-height:1.15;margin:0 0 12px;letter-spacing:-.025em;font-weight:650}
 .hero em{font-style:normal;color:var(--blue)}.hero p{color:var(--sub);margin:0;font-size:16px}
-.stepper{display:flex;flex-wrap:wrap;gap:8px 8px;list-style:none;padding:0;margin:0 0 20px}
+.stepper{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;list-style:none;padding:0;margin:0 0 20px}
 .stepper li{display:flex;align-items:center;gap:8px;padding:6px 14px 6px 8px;border:1px solid var(--line);border-radius:99px;color:var(--sub);font-size:13.5px;background:var(--bg)}
 .stepper span{display:grid;place-items:center;width:20px;height:20px;border-radius:50%;background:var(--soft);font-size:11.5px;font-weight:600}
 .stepper .on{border-color:var(--blue);color:var(--blue);background:var(--tint);font-weight:500}.stepper .on span{background:var(--blue);color:#fff}
 .stepper .done{color:var(--ok)}.stepper .done span{background:var(--ok);color:#fff}
-.card{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:28px;max-width:540px;display:flex;flex-direction:column;gap:16px;box-shadow:0 1px 2px rgb(15 23 34/.04),0 8px 24px rgb(15 23 34/.04)}
-.card.wide{max-width:none}.card.center{text-align:center}
+.card{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:28px;max-width:540px;margin:0 auto;display:flex;flex-direction:column;gap:16px;box-shadow:0 1px 2px rgb(15 23 34/.04),0 8px 24px rgb(15 23 34/.04)}
+.card.wide{max-width:none;margin:0}.card.center{text-align:center}
 h2{margin:0;font-size:19px;font-weight:650;letter-spacing:-.01em}.muted{color:var(--sub);margin:0}.mono{font-family:'JetBrains Mono',monospace;font-size:12.5px}
 label{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:500;color:var(--ink)}
 input{background:var(--bg);border:1px solid #cbd5e1;border-radius:8px;padding:10px 12px;outline:none;transition:border-color .15s,box-shadow .15s}
