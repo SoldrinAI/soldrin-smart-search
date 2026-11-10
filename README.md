@@ -1,4 +1,4 @@
-# Soldrin Smart Search
+# SoldrinAI Smart Search
 
 Upload a CSV/XLSX and search it by meaning. Hybrid ranking: 65% semantic (all-MiniLM-L6-v2 embeddings) + 35% BM25 keywords.
 

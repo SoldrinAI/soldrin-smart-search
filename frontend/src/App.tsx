@@ -1,7 +1,7 @@
-import { useMemo, useState, type DragEvent, type FormEvent } from 'react';
+import { useMemo, useState, type DragEvent, type FormEvent, type ReactNode } from 'react';
 import {
   AlertCircle, ArrowRight, Check, FileSpreadsheet, LoaderCircle, RotateCcw, Search, ShieldCheck,
-  Sparkles, UploadCloud, X,
+  UploadCloud, X, Zap,
 } from 'lucide-react';
 import { createSession, indexFile, search, type Dataset, type SearchResult } from './api';
 
@@ -22,8 +22,22 @@ function suggestions(ds: Dataset): string[] {
 function Brand() {
   return (
     <div className="brand">
-      <span className="logo"><Search size={17} strokeWidth={3} /></span>
-      <span>Soldrin <b>Smart Search</b></span>
+      <svg viewBox="0 0 32 32" width="30" height="30" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true">
+        <path d="M16 2.5l11.7 6.75v13.5L16 29.5 4.3 22.75V9.25z" />
+        <path d="M16 2.5v27M4.3 9.25l23.4 13.5M27.7 9.25L4.3 22.75" opacity=".55" />
+        <circle cx="16" cy="16" r="3.2" fill="currentColor" stroke="none" />
+        <g fill="#fff"><circle cx="16" cy="2.5" r="2" /><circle cx="27.7" cy="9.25" r="2" /><circle cx="27.7" cy="22.75" r="2" /><circle cx="16" cy="29.5" r="2" /><circle cx="4.3" cy="22.75" r="2" /><circle cx="4.3" cy="9.25" r="2" /></g>
+      </svg>
+      <span>Soldrin<b>AI</b> <em>Smart Search</em></span>
+    </div>
+  );
+}
+
+function Privacy({ children }: { children: ReactNode }) {
+  return (
+    <div className="privacy" role="note">
+      <ShieldCheck size={20} />
+      <div><strong>Your privacy</strong><p>{children}</p></div>
     </div>
   );
 }
@@ -65,9 +79,10 @@ function Details({ onDone }: { onDone: (name: string) => void }) {
   return (
     <form onSubmit={submit} className="card">
       <h2>Welcome, let’s get started</h2>
-      <p className="muted">Tell us who’s searching. We’ll share your name and number with the Soldrin team so they can follow up.</p>
+      <p className="muted">Tell us who’s searching to get started.</p>
       <label>First name<input value={name} onChange={(e) => setName(e.target.value)} placeholder="Samira" autoComplete="given-name" required /></label>
       <label>Mobile number<input value={mobile} onChange={(e) => setMobile(e.target.value)} placeholder="+1 415 555 0182" autoComplete="tel" inputMode="tel" required /></label>
+      <Privacy>We record your first name and mobile number so the SoldrinAI team can follow up with you. Nothing else about you is collected, and the spreadsheet you upload is never stored.</Privacy>
       {err && <Err msg={err} clear={() => setErr('')} />}
       <button className="btn" disabled={busy}>{busy ? <LoaderCircle className="spin" size={16} /> : <ArrowRight size={16} />} Continue</button>
     </form>
@@ -113,9 +128,10 @@ function Upload({ onDone }: { onDone: (d: Dataset) => void }) {
         <input type="file" accept=".csv,.xlsx" onChange={(e) => pick(e.target.files?.[0])} hidden />
         <UploadCloud size={28} /><b>Drop a file or click to browse</b>
       </label>
+      <Privacy>Your spreadsheet is <b>not stored anywhere</b>. It is processed in memory to build the search index, kept only in this browser tab, and discarded when you close or refresh the page.</Privacy>
       {file && <div className="file"><FileSpreadsheet size={18} /><span>{file.name}</span><button type="button" onClick={() => setFile(null)} aria-label="Remove file"><X size={14} /></button></div>}
       {err && <Err msg={err} clear={() => setErr('')} />}
-      <button className="btn" disabled={!file} onClick={go}><Sparkles size={16} /> Index this file</button>
+      <button className="btn" disabled={!file} onClick={go}><Zap size={16} /> Index this file</button>
     </div>
   );
 }
@@ -134,7 +150,7 @@ function Results({ ds, res }: { ds: Dataset; res: SearchResult }) {
               <tr key={h.index}>
                 <td className="mono">#{h.index + 1}</td>
                 {cols.map((c) => <td key={c}>{ds.rows[h.index][c] ?? '—'}</td>)}
-                <td><span className="pill" title={`semantic ${h.vectorScore.toFixed(2)} · keyword ${h.bm25Score.toFixed(2)}`}>{Math.round(h.score * 100)}%</span></td>
+                <td><span className={`pill ${h.score >= 0.6 ? 'hi' : h.score >= 0.3 ? 'mid' : 'lo'}`} title={`semantic ${h.vectorScore.toFixed(2)} · keyword ${h.bm25Score.toFixed(2)}`}>{Math.round(h.score * 100)}%</span></td>
               </tr>
             ))}
           </tbody>
@@ -143,7 +159,7 @@ function Results({ ds, res }: { ds: Dataset; res: SearchResult }) {
       <div className="cards">
         {res.results.map((h) => (
           <article key={h.index}>
-            <header><span className="mono">Row #{h.index + 1}</span><span className="pill">{Math.round(h.score * 100)}%</span></header>
+            <header><span className="mono">Row #{h.index + 1}</span><span className={`pill ${h.score >= 0.6 ? 'hi' : h.score >= 0.3 ? 'mid' : 'lo'}`}>{Math.round(h.score * 100)}%</span></header>
             <dl>{cols.map((c) => ds.rows[h.index][c] && <div key={c}><dt>{c}</dt><dd>{ds.rows[h.index][c]}</dd></div>)}</dl>
           </article>
         ))}
@@ -188,18 +204,18 @@ export default function App() {
 
   return (
     <div className="shell">
-      <header><Brand /><span className="status"><i /> {name ? `Signed in as ${name}` : 'Private session'}</span></header>
+      <header><Brand /><span className="status"><i /> {name ? `Session for ${name}` : 'Private session'}</span></header>
       <main>
         <div className="hero">
-          <h1>Find rows by <em>meaning</em>, not just keywords.</h1>
-          <p>Upload a spreadsheet and ask in plain language. Soldrin Smart Search blends semantic embeddings with keyword ranking.</p>
+          <h1>Find the right rows by <em>meaning</em>, not just keywords.</h1>
+          <p>Upload a spreadsheet and ask in plain language. SoldrinAI Smart Search combines semantic embeddings with keyword ranking.</p>
         </div>
         <Stepper step={step} />
         {step === 0 && <Details onDone={(n) => { setName(n); setStep(1); }} />}
         {step === 1 && <Upload onDone={(d) => { setDs(d); setStep(2); }} />}
         {step === 2 && ds && <SearchStep ds={ds} onReplace={() => setStep(1)} />}
       </main>
-      <footer><ShieldCheck size={13} /> Your file is processed in memory and never stored. © Soldrin</footer>
+      <footer><ShieldCheck size={14} /> Your uploaded files are never stored. Only your name and number are recorded. © SoldrinAI</footer>
     </div>
   );
 }

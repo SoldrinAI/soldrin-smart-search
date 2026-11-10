@@ -1,4 +1,4 @@
-"""Soldrin Smart Search API (FastAPI). Stateless, so it runs on Vercel serverless.
+"""SoldrinAI Smart Search API (FastAPI). Stateless, so it runs on Vercel serverless.
 
 Flow: /api/details -> /api/parse (file -> rows) -> /api/embed (batched) -> /api/search.
 The browser holds the index (texts + vectors) and sends it back with each search.
@@ -28,7 +28,7 @@ import files  # noqa: E402
 
 MAX_UPLOAD = 4 * 1024 * 1024  # Vercel request bodies are capped at ~4.5 MB
 
-app = FastAPI(title="Soldrin Smart Search API", docs_url="/api/docs", openapi_url="/api/openapi.json")
+app = FastAPI(title="SoldrinAI Smart Search API", docs_url="/api/docs", openapi_url="/api/openapi.json")
 
 
 class Details(BaseModel):
