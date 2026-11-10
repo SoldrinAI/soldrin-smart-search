@@ -7,7 +7,17 @@ import { createSession, indexFile, search, type Dataset, type SearchResult } fro
 
 type Step = 0 | 1 | 2;
 const STEPS = ['Your details', 'Upload data', 'Search'];
-const EXAMPLES = ['someone who works with animals', 'overdue payments', 'senior engineers in Europe'];
+
+/** Suggestions come from the uploaded data: a short value from three evenly spaced rows. */
+function suggestions(ds: Dataset): string[] {
+  const col = ds.columns[Math.min(1, ds.columns.length - 1)];
+  const out = new Set<string>();
+  for (let i = 0; i < 3; i++) {
+    const v = ds.rows[Math.floor(((i + 0.5) * ds.rows.length) / 3)]?.[col];
+    if (v) out.add(v.length > 40 ? `${v.slice(0, 40).trim()}…` : v);
+  }
+  return [...out];
+}
 
 function Brand() {
   return (
@@ -55,7 +65,7 @@ function Details({ onDone }: { onDone: (name: string) => void }) {
   return (
     <form onSubmit={submit} className="card">
       <h2>Welcome, let’s get started</h2>
-      <p className="muted">Tell us who’s searching. It takes five seconds.</p>
+      <p className="muted">Tell us who’s searching. We’ll share your name and number with the Soldrin team so they can follow up.</p>
       <label>First name<input value={name} onChange={(e) => setName(e.target.value)} placeholder="Samira" autoComplete="given-name" required /></label>
       <label>Mobile number<input value={mobile} onChange={(e) => setMobile(e.target.value)} placeholder="+1 415 555 0182" autoComplete="tel" inputMode="tel" required /></label>
       {err && <Err msg={err} clear={() => setErr('')} />}
@@ -164,7 +174,7 @@ function SearchStep({ ds, onReplace }: { ds: Dataset; onReplace: () => void }) {
         <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Describe what you’re looking for…" aria-label="Search your data" autoFocus />
         <button className="btn" disabled={busy}>{busy ? <LoaderCircle className="spin" size={16} /> : 'Search'}</button>
       </form>
-      <div className="chips">{EXAMPLES.map((x) => <button key={x} type="button" onClick={() => { setQ(x); run(x); }}>{x}</button>)}</div>
+      <div className="chips">{useMemo(() => suggestions(ds), [ds]).map((x) => <button key={x} type="button" onClick={() => { setQ(x); run(x); }}>{x}</button>)}</div>
       {err && <Err msg={err} clear={() => setErr('')} />}
       {res && <Results ds={ds} res={res} />}
     </div>

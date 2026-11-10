@@ -5,9 +5,12 @@ The browser holds the index (texts + vectors) and sends it back with each search
 """
 from __future__ import annotations
 
+import os
 import re
+import smtplib
 import sys
 import uuid
+from email.message import EmailMessage
 from pathlib import Path
 
 from fastapi import FastAPI, File, HTTPException, UploadFile
@@ -55,6 +58,31 @@ class SearchIn(BaseModel):
     limit: int = Field(default=20, ge=1, le=50)
 
 
+def notify(d: "Details") -> bool:
+    """Email the visitor's details to NOTIFY_TO via SMTP (Outlook by default).
+
+    Configure with env vars: SMTP_USER, SMTP_PASS (app password), NOTIFY_TO,
+    optional SMTP_HOST (default smtp-mail.outlook.com) and SMTP_PORT (587).
+    Never blocks the visitor: returns False if unconfigured or sending fails.
+    """
+    user, pwd, to = os.getenv("SMTP_USER"), os.getenv("SMTP_PASS"), os.getenv("NOTIFY_TO")
+    if not (user and pwd and to):
+        return False
+    msg = EmailMessage()
+    msg["Subject"] = f"New Smart Search visitor: {d.firstName}"
+    msg["From"], msg["To"] = user, to
+    msg.set_content(f"Name: {d.firstName}\nMobile: {d.mobile}")
+    try:
+        with smtplib.SMTP(os.getenv("SMTP_HOST", "smtp-mail.outlook.com"), int(os.getenv("SMTP_PORT", "587")), timeout=8) as s:
+            s.starttls()
+            s.login(user, pwd)
+            s.send_message(msg)
+        return True
+    except Exception as exc:  # noqa: BLE001
+        print(f"notify failed: {exc}")
+        return False
+
+
 @app.get("/api/health")
 def health():
     return {"status": "ok", "model": engine.MODEL_NAME}
@@ -62,6 +90,7 @@ def health():
 
 @app.post("/api/details", status_code=201)
 def details(d: Details):
+    notify(d)
     return {"sessionId": str(uuid.uuid4()), "firstName": d.firstName, "mobile": d.mobile}
 
 
