@@ -24,3 +24,8 @@ cd frontend && npm install && npm run dev
 
 ## Deploy
 Push to GitHub, then in Vercel: **Add New → Project → import the repo → Deploy** (no settings to change).
+
+## Visitor log (optional)
+Each visitor's name + mobile is appended to a CSV in a **separate private** GitHub repo (never this public one).
+Set in Vercel → Settings → Environment Variables: `LOG_REPO` (`owner/repo`), `LOG_TOKEN` (fine-grained token,
+Contents read/write on that repo only), optional `LOG_PATH` (default `leads.csv`).

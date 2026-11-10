@@ -5,12 +5,17 @@ The browser holds the index (texts + vectors) and sends it back with each search
 """
 from __future__ import annotations
 
+import base64
+import csv
+import io
+import json
 import os
 import re
-import smtplib
 import sys
+import urllib.error
+import urllib.request
 import uuid
-from email.message import EmailMessage
+from datetime import datetime, timezone
 from pathlib import Path
 
 from fastapi import FastAPI, File, HTTPException, UploadFile
@@ -58,29 +63,56 @@ class SearchIn(BaseModel):
     limit: int = Field(default=20, ge=1, le=50)
 
 
-def notify(d: "Details") -> bool:
-    """Email the visitor's details to NOTIFY_TO via SMTP (Outlook by default).
+def log_visitor(d: "Details") -> bool:
+    """Append "timestamp,name,mobile" to a CSV in a (private!) GitHub repo via the contents API.
 
-    Configure with env vars: SMTP_USER, SMTP_PASS (app password), NOTIFY_TO,
-    optional SMTP_HOST (default smtp-mail.outlook.com) and SMTP_PORT (587).
-    Never blocks the visitor: returns False if unconfigured or sending fails.
+    Env vars: LOG_TOKEN (fine-grained PAT, Contents: read & write on that repo only),
+    LOG_REPO ("owner/repo"), optional LOG_PATH (default leads.csv), LOG_BRANCH (default repo default).
+    Never blocks the visitor: returns False if unconfigured or the write fails.
     """
-    user, pwd, to = os.getenv("SMTP_USER"), os.getenv("SMTP_PASS"), os.getenv("NOTIFY_TO")
-    if not (user and pwd and to):
+    token, repo = os.getenv("LOG_TOKEN"), os.getenv("LOG_REPO")
+    if not (token and repo):
         return False
-    msg = EmailMessage()
-    msg["Subject"] = f"New Smart Search visitor: {d.firstName}"
-    msg["From"], msg["To"] = user, to
-    msg.set_content(f"Name: {d.firstName}\nMobile: {d.mobile}")
-    try:
-        with smtplib.SMTP(os.getenv("SMTP_HOST", "smtp-mail.outlook.com"), int(os.getenv("SMTP_PORT", "587")), timeout=8) as s:
-            s.starttls()
-            s.login(user, pwd)
-            s.send_message(msg)
-        return True
-    except Exception as exc:  # noqa: BLE001
-        print(f"notify failed: {exc}")
-        return False
+    path, branch = os.getenv("LOG_PATH", "leads.csv"), os.getenv("LOG_BRANCH")
+    url = f"https://api.github.com/repos/{repo}/contents/{path}"
+    headers = {"Authorization": f"Bearer {token}", "Accept": "application/vnd.github+json",
+               "User-Agent": "soldrin-smart-search", "X-GitHub-Api-Version": "2022-11-28"}
+    safe = lambda v: "'" + v if v[:1] in "=+-@" else v  # noqa: E731  (CSV formula injection)
+    buf = io.StringIO()
+    csv.writer(buf).writerow([datetime.now(timezone.utc).isoformat(timespec="seconds"), safe(d.firstName), safe(d.mobile)])
+    row = buf.getvalue()
+
+    def call(method: str, data: dict | None = None, query: str = ""):
+        req = urllib.request.Request(url + query, method=method, headers=headers,
+                                     data=json.dumps(data).encode() if data else None)
+        with urllib.request.urlopen(req, timeout=8) as r:
+            return json.loads(r.read())
+
+    q = f"?ref={branch}" if branch else ""
+    for _ in range(4):  # retry if two visitors write at the same moment
+        try:
+            try:
+                cur = call("GET", query=q)
+                text, sha = base64.b64decode(cur["content"]).decode(), cur["sha"]
+            except urllib.error.HTTPError as e:
+                if e.code != 404:
+                    raise
+                text, sha = "timestamp_utc,first_name,mobile\n", None
+            body = {"message": "Log new visitor", "content": base64.b64encode((text + row).encode()).decode()}
+            if sha:
+                body["sha"] = sha
+            if branch:
+                body["branch"] = branch
+            call("PUT", body)
+            return True
+        except urllib.error.HTTPError as e:
+            if e.code not in (409, 422):
+                print(f"visitor log failed: {e.code}")
+                return False
+        except Exception as exc:  # noqa: BLE001
+            print(f"visitor log failed: {exc}")
+            return False
+    return False
 
 
 @app.get("/api/health")
@@ -90,7 +122,7 @@ def health():
 
 @app.post("/api/details", status_code=201)
 def details(d: Details):
-    notify(d)
+    log_visitor(d)
     return {"sessionId": str(uuid.uuid4()), "firstName": d.firstName, "mobile": d.mobile}
 
 
