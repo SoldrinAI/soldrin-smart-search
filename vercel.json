@@ -1,0 +1,19 @@
+{
+  "builds": [
+    {
+      "src": "backend/index.py",
+      "use": "@vercel/python",
+      "config": { "maxLambdaSize": "250mb", "includeFiles": "backend/model/**" }
+    },
+    {
+      "src": "frontend/package.json",
+      "use": "@vercel/static-build",
+      "config": { "distDir": "dist" }
+    }
+  ],
+  "routes": [
+    { "src": "/api/(.*)", "dest": "/backend/index.py" },
+    { "handle": "filesystem" },
+    { "src": "/(.*)", "dest": "/frontend/$1" }
+  ]
+}
