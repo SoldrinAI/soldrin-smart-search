@@ -6,8 +6,10 @@ export interface Dataset {
 export interface Hit { index: number; score: number; vectorScore: number; bm25Score: number }
 export interface SearchResult { query: string; totalRows: number; results: Hit[]; method: string; model: string }
 
+// Relative URL: the same build works at the site root and under a sub-path such as /smart-search/
+// (the page URL must end in a slash there).
 async function call<T>(path: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(`/api${path}`, init);
+  const res = await fetch(`api${path}`, init);
   const body = res.headers.get('content-type')?.includes('json') ? await res.json() : await res.text();
   if (!res.ok) {
     const d = typeof body === 'object' && body ? (body as { detail?: unknown }).detail : body;
