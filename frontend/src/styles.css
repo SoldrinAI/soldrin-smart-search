@@ -46,5 +46,6 @@ th{position:sticky;top:0;background:var(--soft);color:var(--sub);font-weight:600
 .cards header{padding:0 0 8px;border:0;display:flex;justify-content:space-between}.cards dl{margin:0;display:grid;gap:6px}
 .cards dt{font-size:11px;color:var(--sub);text-transform:uppercase;letter-spacing:.05em}.cards dd{margin:0;word-break:break-word}
 footer{color:var(--sub);font-size:13px;padding:18px 0;display:flex;gap:8px;align-items:center;border-top:1px solid var(--line)}footer svg{color:var(--ok);flex:none}
+footer{flex-wrap:wrap}footer .wa{margin-left:auto;display:inline-flex;gap:6px;align-items:center;color:#128c4f;font-weight:600;text-decoration:none}footer .wa:hover{text-decoration:underline}footer .wa svg{color:#128c4f}
 .spin{animation:s 1s linear infinite}@keyframes s{to{transform:rotate(360deg)}}
 @media(max-width:700px){.table-wrap{display:none}.cards{display:flex}.card{padding:20px}.brand em{display:none}}

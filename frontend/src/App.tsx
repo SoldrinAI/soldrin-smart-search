@@ -1,8 +1,9 @@
 import { useMemo, useState, type DragEvent, type FormEvent, type ReactNode } from 'react';
 import {
-  AlertCircle, ArrowRight, Check, FileSpreadsheet, LoaderCircle, RotateCcw, Search, ShieldCheck,
+  AlertCircle, ArrowRight, Check, FileSpreadsheet, LoaderCircle, MessageCircle, RotateCcw, Search, ShieldCheck,
   UploadCloud, X, Zap,
 } from 'lucide-react';
+import { whatsappLink } from './contact';
 import { createSession, indexFile, search, type Dataset, type SearchResult } from './api';
 
 type Step = 0 | 1 | 2;
@@ -215,7 +216,10 @@ export default function App() {
         {step === 1 && <Upload onDone={(d) => { setDs(d); setStep(2); }} />}
         {step === 2 && ds && <SearchStep ds={ds} onReplace={() => setStep(1)} />}
       </main>
-      <footer><ShieldCheck size={14} /> Your uploaded files are never stored. Only your name and number are recorded. © SoldrinAI</footer>
+      <footer>
+        <ShieldCheck size={14} /> <span>Your uploaded files are never stored. Only your name and number are recorded. © SoldrinAI</span>
+        <a className="wa" href={whatsappLink} target="_blank" rel="noreferrer"><MessageCircle size={14} /> Chat on WhatsApp</a>
+      </footer>
     </div>
   );
 }

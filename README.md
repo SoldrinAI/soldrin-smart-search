@@ -117,3 +117,6 @@ Push to GitHub, then in Vercel choose **Add New → Project**, import the repo a
 ## Limits and roadmap
 - Limits: 1,000 rows, 100 columns, 4 MB (Vercel request-body cap), CSV and XLSX only.
 - Ideas: larger files via chunked upload, saved indexes with an optional vector store, column weighting, and multilingual models.
+
+## Contact
+Questions or want something like this built for your data? [Chat on WhatsApp](https://wa.me/919833644917?text=Hi%2C%20I%20found%20SoldrinAI%20Smart%20Search%20on%20GitHub) or find me on [LinkedIn](https://www.linkedin.com/in/yaohan-fernandes/).
